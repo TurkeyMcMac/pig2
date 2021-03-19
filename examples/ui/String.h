@@ -3,6 +3,9 @@
 
 #include <stddef.h>
 
+struct String;
+typedef struct String String;
+
 String *String_alloc(void);
 
 size_t String_len(const String *str);
