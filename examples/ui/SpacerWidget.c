@@ -52,5 +52,11 @@ static const void *getter(const void *iid)
 	};
 	if (iid == Widget_iid) return &Widget_impl;
 
+	static const struct Node_impl Node_impl = {
+		.label = "SpacerWidget",
+		.for_each_child = NULL,
+	};
+	if (iid == Node_iid) return &Node_impl;
+
 	return Object_getter(iid);
 }

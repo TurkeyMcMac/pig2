@@ -48,6 +48,7 @@ bool GridWidget_place(GridWidget *grid, int x, int y, Object *child)
 {
 	if (x >= 0 && x < grid->width && y >= 0 && y < grid->height
 	 && PIG2_GET(child, Widget_iid)) {
+		Object_remove_ref(grid->tiles[y * grid->width + x].obj);
 		grid->tiles[y * grid->width + x].obj = child;
 		return true;
 	}
