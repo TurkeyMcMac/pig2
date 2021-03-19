@@ -13,12 +13,12 @@ int main(void)
 	keypad(stdscr, TRUE);
 
 	GridWidget *grid = GridWidget_alloc(7, 7);
-	SpacerWidget *sw = SpacerWidget_alloc((struct widget_pair) { 5, 3 },
+	SpacerWidget *sw = SpacerWidget_alloc((struct widget_pair) { 10, 6 },
 		(struct widget_pair) { 2, 1 });
 	GridWidget_place(grid, 0, 0, Object_add_ref((Object *)sw));
 	GridWidget_place(grid, 2, 2, Object_add_ref((Object *)sw));
 	GridWidget_place(grid, 4, 4, Object_add_ref((Object *)sw));
-	GridWidget_place(grid, 6, 6, (Object *)sw);
+	GridWidget_place(grid, 6, 6, Object_add_ref((Object *)sw));
 	GridWidget_place(grid, 3, 5, (Object *)TextWidget_alloc("One line"));
 	GridWidget_place(grid, 3, 3,
 		(Object *)TextWidget_alloc("test\nfoo\nbar\nbaz"));
@@ -26,12 +26,16 @@ int main(void)
 		(Object *)TextWidget_alloc("Blah blah blah"));
 	GridWidget_place(grid, 1, 5,
 		(Object *)TextWidget_alloc("The quick brown fox"));
-	GridWidget *grid2 = GridWidget_alloc(2, 2);
+	GridWidget *grid2 = GridWidget_alloc(3, 3);
 	GridWidget_place(grid2, 0, 0,
 		(Object *)TextWidget_alloc("Subgrid foo"));
-	GridWidget_place(grid2, 1, 1,
+	GridWidget_place(grid2, 1, 1, Object_add_ref((Object *)sw));
+	GridWidget_place(grid2, 2, 2,
+		(Object *)TextWidget_alloc("Subgrid bar"));
+	GridWidget_place(grid2, 2, 2,
 		(Object *)TextWidget_alloc("Subgrid bar"));
 	GridWidget_place(grid, 1, 1, (Object *)grid2);
+	Object_remove_ref((Object *)sw);
 	for (;;) {
 		erase();
 		struct widget_pair pos = { .x = 0, .y = 0 };
@@ -43,6 +47,13 @@ int main(void)
 		switch (getch()) {
 		case 'q':
 			goto end;
+#ifdef KEY_RESIZE
+		case KEY_RESIZE:
+#	ifdef PDCURSES
+			resize_term(0, 0);
+#	endif
+			break;
+#endif
 		}
 	}
 end:

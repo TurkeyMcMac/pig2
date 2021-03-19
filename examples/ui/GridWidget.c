@@ -117,8 +117,16 @@ static void draw(void *self_void, WINDOW *win,
 	const GridWidget *self = self_void;
 	bool x_small = self->dims.x > dims.x;
 	bool x_min_small = self->min_dims.x > dims.x;
+	double x_min_expand;
 	bool y_small = self->dims.y > dims.y;
 	bool y_min_small = self->min_dims.y > dims.y;
+	double y_min_expand;
+	if (x_small && !x_min_small)
+		x_min_expand = (double)(dims.x - self->min_dims.x)
+			/ (self->dims.x - self->min_dims.x);
+	if (y_small && !y_min_small)
+		y_min_expand = (double)(dims.y - self->min_dims.y)
+			/ (self->dims.y - self->min_dims.y);
 	struct widget_pair rel_pos = { .x = 0, .y = 0 };
 	for (int y = 0; y < self->height; ++y) {
 		struct widget_pair child_dims;
@@ -127,7 +135,8 @@ static void draw(void *self_void, WINDOW *win,
 			child_dims.y = tile->min_dims.y;
 		} else if (y_small) {
 			child_dims.y = tile->min_dims.y
-				+ (dims.y - self->min_dims.y) / self->width;
+				+ (tile->dims.y - tile->min_dims.y)
+					* y_min_expand;
 		} else {
 			child_dims.y = tile->dims.y;
 		}
@@ -137,11 +146,11 @@ static void draw(void *self_void, WINDOW *win,
 		for (int x = 0; x < self->width; ++x) {
 			tile = &self->tiles[y * self->width + x];
 			if (x_min_small) {
-				child_dims.x = tile->dims.x;
+				child_dims.x = tile->min_dims.x;
 			} else if (x_small) {
-				child_dims.x = tile->dims.x
-					+ (dims.x - self->min_dims.x)
-						/ self->width;
+				child_dims.x = tile->min_dims.x
+					+ (tile->dims.x - tile->min_dims.x)
+						* x_min_expand;
 			} else {
 				child_dims.x = tile->dims.x;
 			}
