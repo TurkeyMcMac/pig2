@@ -115,45 +115,36 @@ static void draw(void *self_void, WINDOW *win,
 	struct widget_pair pos, struct widget_pair dims)
 {
 	const GridWidget *self = self_void;
-	bool x_small = self->dims.x > dims.x;
-	bool x_min_small = self->min_dims.x > dims.x;
-	double x_min_expand;
-	bool y_small = self->dims.y > dims.y;
-	bool y_min_small = self->min_dims.y > dims.y;
-	double y_min_expand;
-	if (x_small && !x_min_small)
-		x_min_expand = (double)(dims.x - self->min_dims.x)
+	double x_expand, y_expand;
+	if (self->min_dims.x > dims.x) {
+		x_expand = 0;
+	} else if (self->dims.x > dims.x) {
+		x_expand = (double)(dims.x - self->min_dims.x)
 			/ (self->dims.x - self->min_dims.x);
-	if (y_small && !y_min_small)
-		y_min_expand = (double)(dims.y - self->min_dims.y)
+	} else {
+		x_expand = 1;
+	}
+	if (self->min_dims.y > dims.y) {
+		y_expand = 0;
+	} else if (self->dims.y > dims.y) {
+		y_expand = (double)(dims.y - self->min_dims.y)
 			/ (self->dims.y - self->min_dims.y);
+	} else {
+		y_expand = 1;
+	}
 	struct widget_pair rel_pos = { .x = 0, .y = 0 };
 	for (int y = 0; y < self->height; ++y) {
 		struct widget_pair child_dims;
 		const struct tile *tile = &self->tiles[y * self->width];
-		if (y_min_small) {
-			child_dims.y = tile->min_dims.y;
-		} else if (y_small) {
-			child_dims.y = tile->min_dims.y
-				+ (tile->dims.y - tile->min_dims.y)
-					* y_min_expand;
-		} else {
-			child_dims.y = tile->dims.y;
-		}
+		child_dims.y = tile->min_dims.y
+			+ (tile->dims.y - tile->min_dims.y) * y_expand;
 		if (rel_pos.y + child_dims.y > dims.y)
 			child_dims.y = dims.y - rel_pos.y;
 		rel_pos.x = 0;
 		for (int x = 0; x < self->width; ++x) {
 			tile = &self->tiles[y * self->width + x];
-			if (x_min_small) {
-				child_dims.x = tile->min_dims.x;
-			} else if (x_small) {
-				child_dims.x = tile->min_dims.x
-					+ (tile->dims.x - tile->min_dims.x)
-						* x_min_expand;
-			} else {
-				child_dims.x = tile->dims.x;
-			}
+			child_dims.x = tile->min_dims.x
+				+ (tile->dims.x - tile->min_dims.x) * x_expand;
 			if (rel_pos.x + child_dims.x > dims.x)
 				child_dims.x = dims.x - rel_pos.x;
 			if (tile->obj && child_dims.x > 0 && child_dims.y > 0) {
