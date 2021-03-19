@@ -114,6 +114,7 @@ static void get_requested_dims(void *self_void,
 static void draw(void *self_void, WINDOW *win,
 	struct widget_pair pos, struct widget_pair dims)
 {
+	fprintf(stderr, "draw %p: %dx%d at (%d, %d)\n", self_void, dims.x, dims.y, pos.x, pos.y);
 	const GridWidget *self = self_void;
 	bool x_small = self->dims.x > dims.x;
 	bool x_min_small = self->min_dims.x > dims.x;
@@ -146,7 +147,7 @@ static void draw(void *self_void, WINDOW *win,
 				child_dims.x = tile->dims.x;
 			}
 			if (child_pos.x + child_dims.x > dims.x)
-				child_dims.x = dims.x - child_pos.x;
+				fprintf(stderr, "out %d - %d\n", dims.x, child_pos.x), child_dims.x = dims.x - child_pos.x;
 			if (tile->obj) {
 				const struct Widget_impl *impl =
 					PIG2_GET(tile->obj, Widget_iid);

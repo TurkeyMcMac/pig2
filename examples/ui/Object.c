@@ -13,9 +13,10 @@ Object *Object_alloc(size_t struct_size)
 	return obj;
 }
 
-void Object_add_ref(Object *obj)
+Object *Object_add_ref(Object *obj)
 {
 	++obj->refcount;
+	return obj;
 }
 
 void Object_remove_ref(Object *obj)

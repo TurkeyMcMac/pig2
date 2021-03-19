@@ -11,7 +11,7 @@ typedef struct {
 
 Object *Object_alloc(size_t struct_size);
 
-void Object_add_ref(Object *obj);
+Object *Object_add_ref(Object *obj);
 
 void Object_remove_ref(Object *obj);
 
