@@ -61,7 +61,6 @@ static void draw(void *self_void, WINDOW *win,
 	struct widget_pair pos, struct widget_pair dims)
 {
 	const TextWidget *self = self_void;
-	fprintf(stderr, "TextWidget '%.10s...': %dx%d at (%d, %d)\n", self->line_text, dims.x, dims.y, pos.x, pos.y);
 	int n_lines = dims.y < self->dims.y ? dims.y : self->dims.y;
 	for (int y = 0; y < n_lines; ++y) {
 		mvwprintw(win, pos.y + y, pos.x, "%.*s",

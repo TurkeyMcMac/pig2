@@ -19,7 +19,7 @@ int main(void)
 	GridWidget_place(grid, 2, 2, Object_add_ref((Object *)sw));
 	GridWidget_place(grid, 4, 4, Object_add_ref((Object *)sw));
 	GridWidget_place(grid, 6, 6, (Object *)sw);
-	GridWidget_place(grid, 1, 1, (Object *)TextWidget_alloc("One line"));
+	GridWidget_place(grid, 3, 5, (Object *)TextWidget_alloc("One line"));
 	GridWidget_place(grid, 3, 3,
 		(Object *)TextWidget_alloc("test\nfoo\nbar\nbaz"));
 	GridWidget_place(grid, 5, 5,
@@ -31,7 +31,7 @@ int main(void)
 		(Object *)TextWidget_alloc("Subgrid foo"));
 	GridWidget_place(grid2, 1, 1,
 		(Object *)TextWidget_alloc("Subgrid bar"));
-	GridWidget_place(grid, 3, 5, (Object *)grid2);
+	GridWidget_place(grid, 1, 1, (Object *)grid2);
 	for (;;) {
 		erase();
 		struct widget_pair pos = { .x = 0, .y = 0 };

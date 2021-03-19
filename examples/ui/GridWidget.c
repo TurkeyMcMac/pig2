@@ -114,13 +114,12 @@ static void get_requested_dims(void *self_void,
 static void draw(void *self_void, WINDOW *win,
 	struct widget_pair pos, struct widget_pair dims)
 {
-	fprintf(stderr, "draw %p: %dx%d at (%d, %d)\n", self_void, dims.x, dims.y, pos.x, pos.y);
 	const GridWidget *self = self_void;
 	bool x_small = self->dims.x > dims.x;
 	bool x_min_small = self->min_dims.x > dims.x;
 	bool y_small = self->dims.y > dims.y;
 	bool y_min_small = self->min_dims.y > dims.y;
-	struct widget_pair child_pos = { .x = 0, .y = pos.x };
+	struct widget_pair rel_pos = { .x = 0, .y = 0 };
 	for (int y = 0; y < self->height; ++y) {
 		struct widget_pair child_dims;
 		const struct tile *tile = &self->tiles[y * self->width];
@@ -132,9 +131,9 @@ static void draw(void *self_void, WINDOW *win,
 		} else {
 			child_dims.y = tile->dims.y;
 		}
-		if (child_pos.y + child_dims.y > dims.y)
-			child_dims.y = dims.y - child_pos.y;
-		child_pos.x = pos.x;
+		if (rel_pos.y + child_dims.y > dims.y)
+			child_dims.y = dims.y - rel_pos.y;
+		rel_pos.x = 0;
 		for (int x = 0; x < self->width; ++x) {
 			tile = &self->tiles[y * self->width + x];
 			if (x_min_small) {
@@ -146,18 +145,21 @@ static void draw(void *self_void, WINDOW *win,
 			} else {
 				child_dims.x = tile->dims.x;
 			}
-			if (child_pos.x + child_dims.x > dims.x)
-				fprintf(stderr, "out %d - %d\n", dims.x, child_pos.x), child_dims.x = dims.x - child_pos.x;
-			if (tile->obj) {
+			if (rel_pos.x + child_dims.x > dims.x)
+				child_dims.x = dims.x - rel_pos.x;
+			if (tile->obj && child_dims.x > 0 && child_dims.y > 0) {
 				const struct Widget_impl *impl =
 					PIG2_GET(tile->obj, Widget_iid);
 				assert(impl);
+				struct widget_pair child_pos = {
+					pos.x + rel_pos.x, pos.y + rel_pos.y
+				};
 				impl->draw(tile->obj, win,
 					child_pos, child_dims);
 			}
-			child_pos.x += child_dims.x;
+			rel_pos.x += child_dims.x;
 		}
-		child_pos.y += child_dims.y;
+		rel_pos.y += child_dims.y;
 	}
 }
 
