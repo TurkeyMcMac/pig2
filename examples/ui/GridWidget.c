@@ -199,9 +199,46 @@ static bool recv_input(void *self_void, int key)
 	GridWidget *self = self_void;
 	void *focus =
 		self->tiles[self->focus_y * self->width + self->focus_x].obj;
+	const struct Widget_impl *focus_impl = NULL;
 	if (focus) {
-		const struct Widget_impl *impl = PIG2_GET(focus, Widget_iid);
-		return impl->recv_input(focus, key);
+		focus_impl = PIG2_GET(focus, Widget_iid);
+		if (focus_impl->recv_input(focus, key)) return true;
+	}
+	int dx = 0, dy = 0;
+	switch (key) {
+	case KEY_RIGHT:
+		dx = 1;
+		break;
+	case KEY_DOWN:
+		dy = 1;
+		break;
+	case KEY_LEFT:
+		dx = -1;
+		break;
+	case KEY_UP:
+		dy = -1;
+		break;
+	default:
+		return false;
+	}
+	for (int x = self->focus_x + dx, y = self->focus_y + dy;
+	     x >= 0 && x < self->width && y >= 0 && y < self->height;
+	     x += dx, y += dy) {
+		void *child = self->tiles[y * self->width + x].obj;
+		bool found = false;
+		if (focus && child == focus) {
+			found = true;
+		} else if (child) {
+			const struct Widget_impl *child_impl =
+				PIG2_GET(child, Widget_iid);
+			found = child_impl->focus(child);
+			if (found && focus_impl) focus_impl->unfocus(focus);
+		}
+		if (found) {
+			self->focus_x = x;
+			self->focus_y = y;
+			return true;
+		}
 	}
 	return false;
 }
