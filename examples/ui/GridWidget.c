@@ -8,6 +8,7 @@ struct GridWidget {
 	Object obj;
 	int width, height;
 	struct widget_pair dims, min_dims; // Cached after the calculation.
+	int focus_x, focus_y;
 	struct tile {
 		Object *obj;
 		struct widget_pair dims, min_dims;
@@ -26,6 +27,8 @@ GridWidget *GridWidget_alloc(int width, int height)
 	PIG2_SET_GETTER(grid, getter);
 	grid->width = width;
 	grid->height = height;
+	grid->focus_x = -1;
+	grid->focus_y = -1;
 	for (int y = 0; y < height; ++y) {
 		for (int x = 0; x < width; ++x) {
 			grid->tiles[y * width + x].obj = NULL;
@@ -164,10 +167,60 @@ static void draw(void *self_void, WINDOW *win,
 	}
 }
 
-static bool focus(void *self)
+static bool focus(void *self_void)
 {
-	(void)self;
+	GridWidget *self = self_void;
+	if (self->focus_x >= 0 && self->focus_y >= 0) {
+		void *focus = self->tiles[
+			self->focus_y * self->width + self->focus_x].obj;
+		if (focus) {
+			const struct Widget_impl *impl =
+				PIG2_GET(focus, Widget_iid);
+			assert(impl);
+			if (impl->focus(focus)) return true;
+		}
+	}
+	for (int y = 0; y < self->height; ++y) {
+		for (int x = 0; x < self->width; ++x) {
+			void *child = self->tiles[y * self->width + x].obj;
+			if (child) {
+				const struct Widget_impl *impl =
+					PIG2_GET(child, Widget_iid);
+				assert(impl);
+				if (impl->focus(child)) {
+					self->focus_x = x;
+					self->focus_y = y;
+					return true;
+				}
+			}
+		}
+	}
 	return false;
+}
+
+static bool recv_input(void *self_void, int key)
+{
+	GridWidget *self = self_void;
+	void *focus =
+		self->tiles[self->focus_y * self->width + self->focus_x].obj;
+	if (focus) {
+		const struct Widget_impl *impl = PIG2_GET(focus, Widget_iid);
+		assert(impl);
+		return impl->recv_input(focus, key);
+	}
+	return false;
+}
+
+static void unfocus(void *self_void)
+{
+	GridWidget *self = self_void;
+	void *focus =
+		self->tiles[self->focus_y * self->width + self->focus_x].obj;
+	if (focus) {
+		const struct Widget_impl *impl = PIG2_GET(focus, Widget_iid);
+		assert(impl);
+		impl->unfocus(focus);
+	}
 }
 
 static void for_each_child(const void *self_void, void *ctx,
@@ -198,6 +251,8 @@ static const void *getter(const void *iid)
 		.get_requested_dims = get_requested_dims,
 		.draw = draw,
 		.focus = focus,
+		.recv_input = recv_input,
+		.unfocus = unfocus,
 	};
 	if (iid == Widget_iid) return &Widget_impl;
 
