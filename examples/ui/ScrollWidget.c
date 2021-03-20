@@ -18,6 +18,8 @@ static const void *getter(const void *iid);
 
 ScrollWidget *ScrollWidget_alloc(int height, Object *inner)
 {
+	assert(height >= 0);
+	assert(PIG2_GET(inner, Widget_iid));
 	ScrollWidget *sw = (ScrollWidget *)Object_alloc(sizeof(ScrollWidget));
 	PIG2_SET_GETTER(sw, getter);
 	sw->inner = inner;
@@ -33,7 +35,6 @@ static void get_requested_dims(void *self_void,
 {
 	ScrollWidget *self = self_void;
 	const struct Widget_impl *impl = PIG2_GET(self->inner, Widget_iid);
-	assert(impl);
 	impl->get_requested_dims(self->inner, dims, min_dims);
 	self->inner_height = dims->y;
 	dims->x += 2;
@@ -48,7 +49,6 @@ static void draw(void *self_void, WINDOW *win,
 	const ScrollWidget *self = self_void;
 	const struct Widget_impl *inner_impl =
 		PIG2_GET(self->inner, Widget_iid);
-	assert(inner_impl);
 	--dims.x;
 	if (dims.x > 0) {
 		if (self->inner_height <= self->height) {
@@ -92,7 +92,6 @@ static bool focus(void *self_void)
 	ScrollWidget *self = self_void;
 	const struct Widget_impl *inner_impl =
 		PIG2_GET(self->inner, Widget_iid);
-	assert(inner_impl);
 	self->self_focus = !inner_impl->focus(self->inner);
 	return true;
 }
@@ -102,7 +101,6 @@ static bool recv_input(void *self_void, int key)
 	ScrollWidget *self = self_void;
 	const struct Widget_impl *inner_impl =
 		PIG2_GET(self->inner, Widget_iid);
-	assert(inner_impl);
 	if (inner_impl->recv_input && inner_impl->recv_input(self->inner, key))
 		return true;
 	switch (key) {
@@ -132,7 +130,6 @@ static void unfocus(void *self_void)
 	ScrollWidget *self = self_void;
 	const struct Widget_impl *inner_impl =
 		PIG2_GET(self->inner, Widget_iid);
-	assert(inner_impl);
 	if (inner_impl->unfocus) inner_impl->unfocus(self->inner);
 	self->self_focus = false;
 }

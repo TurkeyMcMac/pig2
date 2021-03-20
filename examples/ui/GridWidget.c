@@ -49,8 +49,8 @@ int GridWidget_height(const GridWidget *grid)
 
 bool GridWidget_place(GridWidget *grid, int x, int y, Object *child)
 {
-	if (x >= 0 && x < grid->width && y >= 0 && y < grid->height
-	 && PIG2_GET(child, Widget_iid)) {
+	if (x >= 0 && x < grid->width && y >= 0 && y < grid->height) {
+		assert(!child || PIG2_GET(child, Widget_iid));
 		Object_remove_ref(grid->tiles[y * grid->width + x].obj);
 		grid->tiles[y * grid->width + x].obj = child;
 		return true;
@@ -72,7 +72,6 @@ static void get_requested_dims(void *self_void,
 			if (tile->obj) {
 				const struct Widget_impl *impl =
 					PIG2_GET(tile->obj, Widget_iid);
-				assert(impl);
 				impl->get_requested_dims(tile->obj,
 					&tile->dims, &tile->min_dims);
 				if (tile->dims.y > row_height)
@@ -154,7 +153,6 @@ static void draw(void *self_void, WINDOW *win,
 			if (tile->obj && child_dims.x > 0 && child_dims.y > 0) {
 				const struct Widget_impl *impl =
 					PIG2_GET(tile->obj, Widget_iid);
-				assert(impl);
 				struct widget_pair child_pos = {
 					pos.x + rel_pos.x, pos.y + rel_pos.y
 				};
@@ -176,7 +174,6 @@ static bool focus(void *self_void)
 		if (focus) {
 			const struct Widget_impl *impl =
 				PIG2_GET(focus, Widget_iid);
-			assert(impl);
 			if (impl->focus(focus)) return true;
 		}
 	}
@@ -186,7 +183,6 @@ static bool focus(void *self_void)
 			if (child) {
 				const struct Widget_impl *impl =
 					PIG2_GET(child, Widget_iid);
-				assert(impl);
 				if (impl->focus(child)) {
 					self->focus_x = x;
 					self->focus_y = y;
@@ -205,7 +201,6 @@ static bool recv_input(void *self_void, int key)
 		self->tiles[self->focus_y * self->width + self->focus_x].obj;
 	if (focus) {
 		const struct Widget_impl *impl = PIG2_GET(focus, Widget_iid);
-		assert(impl);
 		return impl->recv_input(focus, key);
 	}
 	return false;
@@ -218,7 +213,6 @@ static void unfocus(void *self_void)
 		self->tiles[self->focus_y * self->width + self->focus_x].obj;
 	if (focus) {
 		const struct Widget_impl *impl = PIG2_GET(focus, Widget_iid);
-		assert(impl);
 		impl->unfocus(focus);
 	}
 }
