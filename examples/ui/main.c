@@ -1,10 +1,16 @@
 #include "Object.h"
+#include "ButtonWidget.h"
 #include "GridWidget.h"
 #include "Node.h"
 #include "ScrollWidget.h"
 #include "SpacerWidget.h"
 #include "TextWidget.h"
 #include "Widget.h"
+
+void button_fun(void *ctx)
+{
+	fputs("Pressed\n", ctx);
+}
 
 int main(void)
 {
@@ -22,6 +28,8 @@ int main(void)
 	GridWidget_place(grid, 1, 1, (Object *)TextWidget_alloc("One line"));
 	GridWidget_place(grid, 3, 3,
 		(Object *)TextWidget_alloc("test\nfoo\nbar\nbaz"));
+	GridWidget_place(grid, 5, 3,
+		(Object *)ButtonWidget_alloc("BUTTON", stderr, button_fun));
 	GridWidget_place(grid, 1, 5,
 		(Object *)TextWidget_alloc("The quick brown fox"));
 	GridWidget *grid2 = GridWidget_alloc(3, 3);
