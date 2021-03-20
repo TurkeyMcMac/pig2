@@ -6,10 +6,114 @@
 #include "SpacerWidget.h"
 #include "TextWidget.h"
 #include "Widget.h"
+#include <string.h>
 
-void button_fun(void *ctx)
+struct button_data {
+	Object obj;
+	GridWidget *text_holder; // Weak pointer.
+	char ch;
+};
+
+static Object *make_button_data(GridWidget *text_holder, char ch)
 {
-	fputs("Pressed\n", ctx);
+	struct button_data *data =
+		(struct button_data *)Object_alloc(sizeof(struct button_data));
+	data->text_holder = text_holder;
+	data->ch = ch;
+	return (Object *)data;
+}
+
+static void button_fun(Object *ctx)
+{
+	struct button_data *data = (struct button_data *)ctx;
+	char str[] = "Pressed button _";
+	str[strlen(str) - 1] = data->ch;
+	GridWidget_place(data->text_holder, 0, 0,
+		(Object *)TextWidget_alloc(str));
+}
+
+static Object *make_button_ui(void)
+{
+	SpacerWidget *space = SpacerWidget_alloc((struct widget_pair) { 2, 1 },
+		(struct widget_pair) { 0, 0 });
+
+	GridWidget *grid = GridWidget_alloc(1, 3);
+	GridWidget_place(grid, 0, 0,
+		(Object *)TextWidget_alloc("Press these buttons"));
+	GridWidget_place(grid, 0, 1, Object_add_ref((Object *)space));
+	GridWidget *buttons = GridWidget_alloc(5, 5);
+	GridWidget_place(grid, 0, 2, (Object *)buttons);
+
+	GridWidget_place(buttons, 1, 1, Object_add_ref((Object *)space));
+	GridWidget_place(buttons, 3, 3, Object_add_ref((Object *)space));
+
+	GridWidget_place(buttons, 0, 0,
+		(Object *)ButtonWidget_alloc("1", make_button_data(grid, '1'),
+			button_fun));
+	GridWidget_place(buttons, 2, 0,
+		(Object *)ButtonWidget_alloc("2", make_button_data(grid, '2'),
+			button_fun));
+	GridWidget_place(buttons, 4, 0,
+		(Object *)ButtonWidget_alloc("3", make_button_data(grid, '3'),
+			button_fun));
+	GridWidget_place(buttons, 0, 2,
+		(Object *)ButtonWidget_alloc("4", make_button_data(grid, '4'),
+			button_fun));
+	GridWidget_place(buttons, 2, 2,
+		(Object *)ButtonWidget_alloc("5", make_button_data(grid, '5'),
+			button_fun));
+	GridWidget_place(buttons, 4, 2,
+		(Object *)ButtonWidget_alloc("6", make_button_data(grid, '6'),
+			button_fun));
+	GridWidget_place(buttons, 0, 4,
+		(Object *)ButtonWidget_alloc("7", make_button_data(grid, '7'),
+			button_fun));
+	GridWidget_place(buttons, 2, 4,
+		(Object *)ButtonWidget_alloc("8", make_button_data(grid, '8'),
+			button_fun));
+	GridWidget_place(buttons, 4, 4,
+		(Object *)ButtonWidget_alloc("9", make_button_data(grid, '9'),
+			button_fun));
+
+	Object_remove_ref((Object *)space);
+
+	return (Object *)grid;
+}
+
+static Object *make_ui(void)
+{
+	GridWidget *grid = GridWidget_alloc(5, 3);
+
+	SpacerWidget *space = SpacerWidget_alloc((struct widget_pair) { 3, 1 },
+		(struct widget_pair) { 1, 0 });
+	GridWidget_place(grid, 1, 0, Object_add_ref((Object *)space));
+	GridWidget_place(grid, 3, 0, Object_add_ref((Object *)space));
+	GridWidget_place(grid, 0, 1, Object_add_ref((Object *)space));
+	Object_remove_ref((Object *)space);
+
+	GridWidget_place(grid, 0, 0, (Object *)TextWidget_alloc("Explanation"));
+	GridWidget_place(grid, 0, 2,
+		(Object *)ScrollWidget_alloc(12,
+			(Object *)TextWidget_alloc("TODO: explain")));
+
+	GridWidget_place(grid, 4, 0, (Object *)TextWidget_alloc("Buttons"));
+	GridWidget_place(grid, 4, 2, make_button_ui());
+
+	GridWidget_place(grid, 2, 0, (Object *)TextWidget_alloc("Node tree"));
+	// A placeholder widget is put in before the widget containing the node
+	// tree so that the node tree string still describes the structure after
+	// the widget displaying it has been added.
+	GridWidget_place(grid, 2, 2,
+		(Object *)ScrollWidget_alloc(12,
+			(Object *)TextWidget_alloc("")));
+	String *node_tree_str = Node_tree_to_str(grid);
+	GridWidget_place(grid, 2, 2,
+		(Object *)ScrollWidget_alloc(12,
+			(Object *)TextWidget_alloc(
+				String_cstr(node_tree_str))));
+	Object_remove_ref((Object *)node_tree_str);
+
+	return (Object *)grid;
 }
 
 int main(void)
@@ -20,40 +124,7 @@ int main(void)
 	curs_set(0);
 	keypad(stdscr, TRUE);
 
-	GridWidget *grid = GridWidget_alloc(7, 7);
-	SpacerWidget *sw = SpacerWidget_alloc((struct widget_pair) { 10, 6 },
-		(struct widget_pair) { 2, 1 });
-	GridWidget_place(grid, 2, 2, Object_add_ref((Object *)sw));
-	GridWidget_place(grid, 4, 4, Object_add_ref((Object *)sw));
-	GridWidget_place(grid, 1, 1, (Object *)TextWidget_alloc("One line"));
-	GridWidget_place(grid, 3, 3,
-		(Object *)TextWidget_alloc("test\nfoo\nbar\nbaz"));
-	GridWidget_place(grid, 5, 3,
-		(Object *)ButtonWidget_alloc("BUTTON", stderr, button_fun));
-	GridWidget_place(grid, 1, 5,
-		(Object *)TextWidget_alloc("The quick brown fox"));
-	GridWidget *grid2 = GridWidget_alloc(3, 3);
-	GridWidget_place(grid2, 0, 0,
-		(Object *)TextWidget_alloc("Subgrid foo"));
-	GridWidget_place(grid2, 1, 1, Object_add_ref((Object *)sw));
-	GridWidget_place(grid2, 2, 2,
-		(Object *)TextWidget_alloc("Subgrid bar"));
-	GridWidget_place(grid2, 2, 2,
-		(Object *)TextWidget_alloc("Subgrid bar"));
-	GridWidget_place(grid, 3, 5, (Object *)grid2);
-	// A placeholder widget is put in before the widget containing the node
-	// tree so that the node tree string still describes the structure after
-	// the widget displaying it has been added.
-	GridWidget_place(grid, 5, 5,
-		(Object *)ScrollWidget_alloc(1,
-			(Object *)TextWidget_alloc("")));
-	String *node_str = Node_tree_to_str(grid);
-	GridWidget_place(grid, 5, 5,
-		(Object *)ScrollWidget_alloc(10,
-			(Object *)TextWidget_alloc(String_cstr(node_str))));
-	Object_remove_ref((Object *)node_str);
-	Object_remove_ref((Object *)sw);
-	void *root = grid;
+	Object *root = make_ui();
 	bool do_draw = true;
 	const struct Widget_impl *impl = PIG2_GET(root, Widget_iid);
 	bool focused = impl->focus(root);

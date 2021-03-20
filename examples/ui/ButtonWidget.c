@@ -1,23 +1,21 @@
 #include "ButtonWidget.h"
 #include "Node.h"
-#include "Object.h"
 #include "Widget.h"
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 struct ButtonWidget {
 	Object obj;
 	const char *label;
-	void *ctx;
-	void (*fun)(void *ctx);
+	Object *ctx;
+	void (*fun)(Object *ctx);
 	bool focused;
 };
 
 static const void *getter(const void *iid);
 
 ButtonWidget *ButtonWidget_alloc(const char *label,
-	void *ctx, void (*fun)(void *ctx))
+	Object *ctx, void (*fun)(Object *ctx))
 {
 	ButtonWidget *bw = (ButtonWidget *)Object_alloc(sizeof(ButtonWidget));
 	PIG2_SET_GETTER(bw, getter);
@@ -69,6 +67,12 @@ static void unfocus(void *self)
 	((ButtonWidget *)self)->focused = false;
 }
 
+static void release(Object *self)
+{
+	Object_remove_ref(((ButtonWidget *)self)->ctx);
+	Object_release(self);
+}
+
 static const void *getter(const void *iid)
 {
 	static const struct Widget_impl Widget_impl = {
@@ -85,6 +89,11 @@ static const void *getter(const void *iid)
 		.for_each_child = NULL,
 	};
 	if (iid == Node_iid) return &Node_impl;
+
+	static const struct Object_impl Object_impl = {
+		.release = release,
+	};
+	if (iid == Object_iid) return &Object_impl;
 
 	return Object_getter(iid);
 }
