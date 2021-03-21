@@ -55,6 +55,7 @@ bool GridWidget_place(GridWidget *grid, int x, int y, Object *child)
 		grid->tiles[y * grid->width + x].obj = child;
 		return true;
 	}
+	Object_remove_ref(child);
 	return false;
 }
 
