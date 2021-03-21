@@ -142,10 +142,6 @@ int main(void)
 	bool focused = impl->focus(root);
 	for (;;) {
 		if (do_draw) {
-#ifdef PDCURSES
-			// PDCurses needs manual resize checking.
-			resize_term(0, 0);
-#endif
 			struct widget_pair pos = { .x = 0, .y = 0 };
 			// The root can take up the whole screen.
 			struct widget_pair dims = { .x = COLS, .y = LINES };
@@ -165,6 +161,10 @@ int main(void)
 			goto end;
 #ifdef KEY_RESIZE
 		case KEY_RESIZE:
+#	ifdef PDCURSES
+			// PDCurses needs manual screen resizing.
+			resize_term(0, 0);
+#	endif
 			// A redraw is needed when the available size changes.
 			do_draw = true;
 			break;
