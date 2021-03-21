@@ -30,7 +30,9 @@ typedef const void *(*pig2_getter_fun)(const void *iid);
 
 // Sets the getter function to getter for the object pointer obj. This can be
 // used in a constructor, for example, and provides a uniform way to set the
-// getter even if the getter is embedded in a sub-struct.
+// getter even if the getter is embedded in a sub-struct. An object should only
+// set its getter in its constructor, then leave the getter the same for the
+// rest of its lifetime.
 #define PIG2_SET_GETTER(obj, getter) \
 	((void)(*(pig2_getter_fun *)(obj) = (getter)))
 
