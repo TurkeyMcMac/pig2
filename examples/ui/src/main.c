@@ -84,11 +84,10 @@ static Object *make_ui(void)
 {
 	GridWidget *grid = GridWidget_alloc(5, 3);
 
-	SpacerWidget *space = SpacerWidget_alloc((struct widget_pair) { 3, 1 },
+	SpacerWidget *space = SpacerWidget_alloc((struct widget_pair) { 7, 1 },
 		(struct widget_pair) { 1, 0 });
-	GridWidget_place(grid, 1, 0, Object_add_ref((Object *)space));
-	GridWidget_place(grid, 3, 0, Object_add_ref((Object *)space));
-	GridWidget_place(grid, 0, 1, Object_add_ref((Object *)space));
+	GridWidget_place(grid, 1, 1, Object_add_ref((Object *)space));
+	GridWidget_place(grid, 3, 1, Object_add_ref((Object *)space));
 	Object_remove_ref((Object *)space);
 
 	GridWidget_place(grid, 0, 0, (Object *)TextWidget_alloc("Explanation"));
