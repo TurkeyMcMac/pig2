@@ -5,7 +5,7 @@ LDLIBS = -lcurses
 CC ?= cc
 RM ?= rm -f
 
-$(exe): src/*
+$(exe): src/* ../../pig2.h
 	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) src/*.c $(LDLIBS)
 
 .PHONY: clean
