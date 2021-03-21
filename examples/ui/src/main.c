@@ -176,7 +176,6 @@ int main(void)
 		}
 	}
 end:
-	if (focused) impl->unfocus(root);
 	Object_remove_ref(root);
 
 	endwin();
