@@ -104,8 +104,22 @@ static Object *make_ui(void)
 	// Create the explanation section on the left.
 	GridWidget_place(grid, 0, 0, (Object *)TextWidget_alloc("Explanation"));
 	GridWidget_place(grid, 0, 2,
-		(Object *)ScrollWidget_alloc(12,
-			(Object *)TextWidget_alloc("TODO: explain")));
+		(Object *)ScrollWidget_alloc(9,
+			(Object *)TextWidget_alloc(
+				"These widgets are laid out on a grid.\n"
+				"You can resize the screen and see the\n"
+				"widgets try to contract and fit.  The\n"
+				"center  column  shows  a widget tree.\n"
+				"These  are  the widgets  of  this  UI\n"
+				"itself. Technically, the widgets form\n"
+				"a directed acyclic graph, not a tree,\n"
+				"since  some   children  are  used  in\n"
+				"multiple places.  The right column is\n"
+				"an example  of  interactive  buttons.\n"
+				"Navigate  to  those buttons with  the\n"
+				"arrow  keys and  press  ENTER to  try\n"
+				"them out.\n"
+			)));
 	// Create the button section on the right.
 	GridWidget_place(grid, 4, 0, (Object *)TextWidget_alloc("Buttons"));
 	GridWidget_place(grid, 4, 2, make_button_ui());
@@ -115,11 +129,11 @@ static Object *make_ui(void)
 	// tree so that the node tree string still describes the structure after
 	// the widget displaying it has been added.
 	GridWidget_place(grid, 2, 2,
-		(Object *)ScrollWidget_alloc(12,
+		(Object *)ScrollWidget_alloc(9,
 			(Object *)TextWidget_alloc("")));
 	String *node_tree_str = Node_tree_to_str(grid);
 	GridWidget_place(grid, 2, 2,
-		(Object *)ScrollWidget_alloc(12,
+		(Object *)ScrollWidget_alloc(9,
 			(Object *)TextWidget_alloc(
 				String_cstr(node_tree_str))));
 	Object_remove_ref((Object *)node_tree_str);
