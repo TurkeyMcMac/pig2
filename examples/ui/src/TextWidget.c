@@ -8,8 +8,11 @@
 
 struct TextWidget {
 	Object obj;
+	// The maximum line width and the number of lines.
 	struct widget_pair dims;
+	// The lines stored as a bunch of consecutive NUL-terminated strings.
 	char *line_text;
+	// The lines stored as dims.y pointers into line_text.
 	char *lines[];
 };
 
@@ -21,14 +24,21 @@ TextWidget *TextWidget_alloc(const char *text)
 	char *line_text = malloc(text_len + 1);
 	assert(line_text);
 	struct widget_pair dims = { .x = 0, .y = 0 };
+	// tp is a mutable pointer to a part of the text.
 	const char *tp = text;
+	// Iterate through the newlines.
 	for (const char *nl; (nl = strchr(tp, '\n')); tp = nl + 1) {
+		// i is the index into text and len is the line length w/o \n.
 		size_t i = tp - text, len = nl - tp;
+		// Check the maximum line width. This doesn't handle tabs, let
+		// alone unicode.
 		if ((int)len > dims.x) dims.x = (int)len;
+		// Store a copy of the line.
 		memcpy(line_text + i, tp, len);
 		line_text[i + len] = '\0';
 		++dims.y;
 	}
+	// Check if there is one more line with no terminating \n.
 	if ((size_t)(tp - text) < text_len) {
 		size_t i = tp - text;
 		size_t len = text_len - i;
@@ -43,6 +53,7 @@ TextWidget *TextWidget_alloc(const char *text)
 	tw->dims = dims;
 	tw->line_text = line_text;
 	for (int i = 0; i < dims.y; ++i) {
+		// Record the lines in the list of pointers.
 		tw->lines[i] = line_text;
 		line_text += strlen(line_text) + 1;
 	}

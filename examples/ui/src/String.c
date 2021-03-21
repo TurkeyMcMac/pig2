@@ -16,6 +16,7 @@ String *String_alloc(void)
 {
 	String *str = (String *)Object_alloc(sizeof(String));
 	PIG2_SET_GETTER(str, getter);
+	// NULL means empty, and is checked in String_ctstr.
 	str->text = NULL;
 	str->len = 0;
 	return str;
@@ -36,6 +37,7 @@ void String_append(String *str, const char *append)
 	size_t append_len = strlen(append);
 	size_t append_start = str->len;
 	str->len += append_len;
+	// This may be inefficient, but that's OK.
 	str->text = realloc(str->text, str->len + 1);
 	assert(str->text);
 	memcpy(str->text + append_start, append, append_len + 1);

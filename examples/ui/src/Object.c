@@ -46,5 +46,7 @@ const void *Object_getter(const void *iid)
 
 void Object_release(Object *self)
 {
+	// This could be done in Object_remove_ref, but this way provides a
+	// better example of super implementations.
 	free(self);
 }

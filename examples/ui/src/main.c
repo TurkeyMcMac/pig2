@@ -8,9 +8,13 @@
 #include "Widget.h"
 #include <string.h>
 
+// This is the reference-counter context of the button functions.
 struct button_data {
 	Object obj;
-	GridWidget *text_holder; // Weak pointer.
+	// A weak pointer to a grid. When the button is pressed, a new text
+	// widget will be placed at (0, 0) on this grid recording the press.
+	GridWidget *text_holder;
+	// The character to record.
 	char ch;
 };
 
@@ -23,6 +27,7 @@ static Object *make_button_data(GridWidget *text_holder, char ch)
 	return (Object *)data;
 }
 
+// The button callback using the button_data above.
 static void button_fun(Object *ctx)
 {
 	struct button_data *data = (struct button_data *)ctx;
@@ -32,21 +37,27 @@ static void button_fun(Object *ctx)
 		(Object *)TextWidget_alloc(str));
 }
 
+// Makes the place of the nine buttons and the text widget set by them.
 static Object *make_button_ui(void)
 {
 	SpacerWidget *space = SpacerWidget_alloc((struct widget_pair) { 2, 1 },
 		(struct widget_pair) { 0, 0 });
 
 	GridWidget *grid = GridWidget_alloc(1, 3);
+	// This is the widget which will be replaced.
 	GridWidget_place(grid, 0, 0,
 		(Object *)TextWidget_alloc("Press these buttons"));
+	// Some space is needed between the text and the buttons.
 	GridWidget_place(grid, 0, 1, Object_add_ref((Object *)space));
+	// The buttons are on their own grid.
 	GridWidget *buttons = GridWidget_alloc(5, 5);
 	GridWidget_place(grid, 0, 2, (Object *)buttons);
 
+	// These spacers but space between all the buttons.
 	GridWidget_place(buttons, 1, 1, Object_add_ref((Object *)space));
 	GridWidget_place(buttons, 3, 3, Object_add_ref((Object *)space));
 
+	// The buttons containing the digits are put in a 3x3 arrangement.
 	GridWidget_place(buttons, 0, 0,
 		(Object *)ButtonWidget_alloc("1", make_button_data(grid, '1'),
 			button_fun));
@@ -84,20 +95,21 @@ static Object *make_ui(void)
 {
 	GridWidget *grid = GridWidget_alloc(5, 3);
 
+	// A lot of space can be put between the sections horizontally.
 	SpacerWidget *space = SpacerWidget_alloc((struct widget_pair) { 7, 1 },
 		(struct widget_pair) { 1, 0 });
 	GridWidget_place(grid, 1, 1, Object_add_ref((Object *)space));
 	GridWidget_place(grid, 3, 1, Object_add_ref((Object *)space));
 	Object_remove_ref((Object *)space);
-
+	// Create the explanation section on the left.
 	GridWidget_place(grid, 0, 0, (Object *)TextWidget_alloc("Explanation"));
 	GridWidget_place(grid, 0, 2,
 		(Object *)ScrollWidget_alloc(12,
 			(Object *)TextWidget_alloc("TODO: explain")));
-
+	// Create the button section on the right.
 	GridWidget_place(grid, 4, 0, (Object *)TextWidget_alloc("Buttons"));
 	GridWidget_place(grid, 4, 2, make_button_ui());
-
+	// Create the node tree section in the middle.
 	GridWidget_place(grid, 2, 0, (Object *)TextWidget_alloc("Node tree"));
 	// A placeholder widget is put in before the widget containing the node
 	// tree so that the node tree string still describes the structure after
@@ -124,19 +136,24 @@ int main(void)
 	keypad(stdscr, TRUE);
 
 	Object *root = make_ui();
+	// Whether the widgets should be drawn or redrawn.
 	bool do_draw = true;
 	const struct Widget_impl *impl = PIG2_GET(root, Widget_iid);
 	bool focused = impl->focus(root);
 	for (;;) {
 		if (do_draw) {
 #ifdef PDCURSES
+			// PDCurses needs manual resize checking.
 			resize_term(0, 0);
 #endif
 			struct widget_pair pos = { .x = 0, .y = 0 };
+			// The root can take up the whole screen.
 			struct widget_pair dims = { .x = COLS, .y = LINES };
+			// These two variables are not used.
 			struct widget_pair req_dims, req_min_dims;
 			impl->get_requested_dims(root,
 				&req_dims, &req_min_dims);
+			// Erase the old frame and draw the new one.
 			erase();
 			impl->draw(root, stdscr, pos, dims);
 			do_draw = false;
@@ -144,13 +161,16 @@ int main(void)
 		int key = getch();
 		switch (key) {
 		case 'q':
+			// Quit.
 			goto end;
 #ifdef KEY_RESIZE
 		case KEY_RESIZE:
+			// A redraw is needed when the available size changes.
 			do_draw = true;
 			break;
 #endif
 		default:
+			// Send other input to the widgets.
 			if (focused) do_draw = impl->recv_input(root, key);
 			break;
 		}
