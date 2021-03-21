@@ -12,6 +12,11 @@ You can also look in the Makefile and follow the directions manually.
 
 ## Concepts in This Example
 
+### General Implementation and Usage
+
+You can find interface implementation code in most of the src/\*.c files.
+[src/main.c](src/main.c) has a good example of method usage.
+
 ### Interfaces
 
 This program contains a few interfaces, whose headers are as follows:
