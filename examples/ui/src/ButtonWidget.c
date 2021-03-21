@@ -6,10 +6,10 @@
 
 struct ButtonWidget {
 	Object obj;
-	const char *label;
 	Object *ctx;
 	void (*fun)(Object *ctx);
 	bool focused;
+	char label[];
 };
 
 static const void *getter(const void *iid);
@@ -17,12 +17,14 @@ static const void *getter(const void *iid);
 ButtonWidget *ButtonWidget_alloc(const char *label,
 	Object *ctx, void (*fun)(Object *ctx))
 {
-	ButtonWidget *bw = (ButtonWidget *)Object_alloc(sizeof(ButtonWidget));
+	size_t label_size = strlen(label) + 1;
+	ButtonWidget *bw = (ButtonWidget *)Object_alloc(
+		offsetof(ButtonWidget, label) + label_size);
 	PIG2_SET_GETTER(bw, getter);
-	bw->label = label;
 	bw->ctx = ctx;
 	bw->fun = fun;
 	bw->focused = false;
+	memcpy(bw->label, label, label_size);
 	return bw;
 }
 
