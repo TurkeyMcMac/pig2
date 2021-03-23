@@ -52,7 +52,7 @@ typedef const void *(*pig2_getter_fun)(const void *iid);
  * iid from the object pointer obj. This is a shortcut for calling the object's
  * pig2_getter_fun.
  */
-#define PIG2_GET(obj, iid) ((*(pig2_getter_fun *)(obj))(iid))
+#define PIG2_GET(obj, iid) ((*(const pig2_getter_fun *)(obj))(iid))
 
 /* Sets the getter function to getter for the object pointer obj. This can be
  * used in a constructor, for example, and provides a uniform way to set the
