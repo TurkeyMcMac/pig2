@@ -35,8 +35,8 @@ at the Object class to see one way to create extendable super classes.
   * [GridWidget](src/GridWidget.h) (Implementing Widget and Node)
   * [ScrollWidget](src/ScrollWidget.h) (Implementing Widget and Node)
   * [SpacerWidget](src/SpacerWidget.h) (Implementing Widget and Node)
-  * [TextWidget](src/TextWidget.h) (Implementing Widget and Node)
   * [String](src/String.h)
+  * [TextWidget](src/TextWidget.h) (Implementing Widget and Node)
 
 (All of these classes also implement the Object "interface" in that they have
 implementations of the abstract methods of the Object class.)
