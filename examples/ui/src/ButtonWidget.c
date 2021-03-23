@@ -69,6 +69,12 @@ static void unfocus(void *self)
 	((ButtonWidget *)self)->focused = false;
 }
 
+static void for_each_child(const void *self, void *ctx,
+	void (*each)(const void *child, void *ctx))
+{
+	each(((const ButtonWidget *)self)->ctx, ctx);
+}
+
 static void release(Object *self)
 {
 	Object_remove_ref(((ButtonWidget *)self)->ctx);
@@ -88,7 +94,7 @@ static const void *getter(const void *iid)
 
 	static const struct Node_impl Node_impl = {
 		.label = "ButtonWidget",
-		.for_each_child = NULL,
+		.for_each_child = for_each_child,
 	};
 	if (iid == Node_iid) return &Node_impl;
 
