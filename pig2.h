@@ -49,8 +49,8 @@
 typedef const void *(*pig2_getter_fun)(const void *iid);
 
 /* Gets an implementation pointer for the interface represented by the pointer
- * iid from the object pointer obj. This is a shortcut for calling the object's
- * pig2_getter_fun.
+ * iid from the constant object pointer obj. This is a shortcut for calling the
+ * object's pig2_getter_fun.
  */
 #define PIG2_GET(obj, iid) ((*(const pig2_getter_fun *)(obj))(iid))
 
