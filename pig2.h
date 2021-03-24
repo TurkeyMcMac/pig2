@@ -41,10 +41,11 @@
  */
 
 /* This represents a getter function that is given a non-NULL interface ID and
- * returns an implementation. It cannot dereference the interface ID. The return
- * value can be cast to the type representing an implementation of the interface
- * corresponding to the given ID. The function returns NULL if an implementation
- * was not found for the given ID.
+ * returns an implementation (which must always be the same for a given ID.) It
+ * cannot dereference the interface ID. The return value can be cast to the type
+ * representing an implementation of the interface corresponding to the given
+ * ID. The function returns NULL if an implementation was not found for the
+ * given ID.
  */
 typedef const void *(*pig2_getter_fun)(const void *iid);
 
