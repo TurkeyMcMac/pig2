@@ -186,6 +186,7 @@ int main(void)
 		default:
 			// Send other input to the widgets.
 			if (focused) do_draw = impl->recv_input(root, key);
+			if (!do_draw) beep();
 			break;
 		}
 	}
