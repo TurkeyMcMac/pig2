@@ -23,7 +23,9 @@ int GridWidget_height(const GridWidget *grid);
 // Places a widget on the grid. The grid takes ownership of the given child
 // reference if it is not NULL. The return value is whether the child was
 // successfully placed. If so, the widget it took the place of is removed.
-// Passing a NULL child deletes the widget at the position.
+// Passing a NULL child deletes the widget at the position. The grid should not
+// be modified while it is in focus so as not to mess up the currently focused
+// child element.
 bool GridWidget_place(GridWidget *grid, int x, int y, Object *child);
 
 #endif /* GRID_WIDGET_H_ */
